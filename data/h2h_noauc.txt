@@ -1,0 +1,7 @@
+58 120 196
+212(out of scope: bowel obstruction) 347 350 404 515 519
+520 539 572(SR - use as source) 593 603 659 674
+777 791(ICUAW nomogram, not a comparison) 811 830 832 892(out of scope) 925 941(MEDS AUC in full text) 963 965 1007
+1039 1050(combined model only) 1064 1070 1074 1079(score AUCs in full text) 1080 1111 1175
+1230 1311 1313 1332(combined only) 1337 1349 1391 1401 1424 1441 1467(score AUCs in full text)
+1480(values in full text)

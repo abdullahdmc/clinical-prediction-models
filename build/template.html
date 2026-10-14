@@ -1,0 +1,430 @@
+<title>Infection Model Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Serif:wght@500;600&family=Public+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap">
+<style>
+/* Layout: reference handbook. Left rail of outcomes, main column of model sheets; each model opens as a full sheet. */
+:root{
+  --bg:#f3f6f5; --surface:#ffffff; --sunk:#eaf0ee; --ink:#17232a; --muted:#56666c; --line:#d8e1df;
+  --accent:#0d6870; --accent-ink:#ffffff; --accent-soft:#dcecec;
+  --ok:#2c7a4c; --ok-soft:#e1f1e7; --info:#2d5ea6; --info-soft:#e3ebf7; --warn:#9a5f0c; --warn-soft:#f8ecd8;
+  --c1:#0d6870; --c2:#4b4fb0; --c3:#d0661b; --c4:#9a3f8e; --c5:#7a6a52; --c6:#2f8a4a; --c7:#c8384a; --c8:#7d8b2a; --cx:#8a979b;
+  --f-display:"IBM Plex Serif", Georgia, "Times New Roman", serif;
+  --f-body:"Public Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --f-mono:"IBM Plex Mono", ui-monospace, Consolas, monospace;
+  --r:6px; color-scheme:light;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0f1618; --surface:#162024; --sunk:#1c282c; --ink:#e2ebe9; --muted:#9aabae; --line:#2b3a3e;
+  --accent:#5fc2c7; --accent-ink:#0b1f21; --accent-soft:#173a3c;
+  --ok:#72c393; --ok-soft:#183126; --info:#8fb0ea; --info-soft:#1b2a40; --warn:#e3b064; --warn-soft:#3a2b14;
+  --c1:#5fc2c7; --c2:#9a9df0; --c3:#f0954d; --c4:#d58bcb; --c5:#c2b293; --c6:#6cc884; --c7:#f07a88; --c8:#c3cf63; --cx:#7f8e92; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#0f1618; --surface:#162024; --sunk:#1c282c; --ink:#e2ebe9; --muted:#9aabae; --line:#2b3a3e;
+  --accent:#5fc2c7; --accent-ink:#0b1f21; --accent-soft:#173a3c;
+  --ok:#72c393; --ok-soft:#183126; --info:#8fb0ea; --info-soft:#1b2a40; --warn:#e3b064; --warn-soft:#3a2b14;
+  --c1:#5fc2c7; --c2:#9a9df0; --c3:#f0954d; --c4:#d58bcb; --c5:#c2b293; --c6:#6cc884; --c7:#f07a88; --c8:#c3cf63; --cx:#7f8e92; color-scheme:dark }
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.55;margin:0}
+a{color:var(--accent);text-underline-offset:2px}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+h1,h2,h3{font-family:var(--f-display);font-weight:600;line-height:1.2;text-wrap:balance;margin:0}
+.wrap{max-width:1240px;margin:0 auto;padding-inline:16px}
+/* top bar */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--surface);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding-block:10px}
+.brand{display:flex;align-items:baseline;gap:10px;text-decoration:none;color:var(--ink);margin-right:auto}
+.brand b{font-family:var(--f-display);font-size:19px;font-weight:600}
+.brand span{font-size:12px;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+.nav{display:flex;gap:4px;flex-wrap:wrap}
+.nav a{padding:6px 10px;border-radius:var(--r);text-decoration:none;color:var(--muted);font-weight:500;font-size:14px}
+.nav a[aria-current="page"]{background:var(--accent-soft);color:var(--ink)}
+.search{position:relative;flex:1 1 240px;max-width:340px}
+.search input{width:100%;padding:8px 12px;border:1px solid var(--line);border-radius:var(--r);background:var(--bg);color:var(--ink);font:inherit;font-size:14px}
+.results{position:absolute;left:0;right:0;top:calc(100% + 4px);background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:0 8px 24px rgba(0,0,0,.12);max-height:360px;overflow:auto}
+.results a{display:block;padding:8px 12px;text-decoration:none;color:var(--ink);border-bottom:1px solid var(--line)}
+.results a small{display:block;color:var(--muted)}
+.results a:hover,.results a.sel{background:var(--sunk)}
+/* shell */
+.shell{display:grid;grid-template-columns:250px minmax(0,1fr);gap:28px;padding-block:24px 64px}
+.rail{position:sticky;top:76px;align-self:start;max-height:calc(100vh - 96px);overflow:auto}
+.rail h4{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:16px 0 6px;font-weight:600}
+.rail h4:first-child{margin-top:0}
+.rail a{display:flex;justify-content:space-between;gap:8px;padding:5px 8px;border-radius:var(--r);text-decoration:none;color:var(--ink);font-size:14px}
+.rail a span{color:var(--muted);font-family:var(--f-mono);font-size:12px}
+.rail a[aria-current="page"]{background:var(--accent-soft)}
+main{min-width:0}
+@media (max-width:900px){.shell{grid-template-columns:1fr}.rail{position:static;max-height:none}.railgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:2px 12px}}
+/* common */
+.eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.lede{font-size:17px;color:var(--muted);max-width:68ch;margin:8px 0 0}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;white-space:nowrap;border:1px solid transparent}
+.chip.inuse{background:var(--ok-soft);color:var(--ok)}
+.chip.validated{background:var(--info-soft);color:var(--info)}
+.chip.developing{background:var(--warn-soft);color:var(--warn)}
+.chip.ev-original{border-color:var(--ok);color:var(--ok)}
+.chip.ev-abstract{border-color:var(--info);color:var(--info)}
+.chip.ev-secondary{border-color:var(--muted);color:var(--muted)}
+.chip.ev-pending,.chip.ev-catalogue{border:1px dashed var(--warn);color:var(--warn)}
+.chip.lmic{background:var(--sunk);color:var(--ink)}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:var(--r);background:var(--accent);color:var(--accent-ink);text-decoration:none;font-weight:600;font-size:14px;border:0;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+.muted{color:var(--muted)}
+/* overview */
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;margin:20px 0 28px}
+.stats div{background:var(--surface);padding:14px 16px}
+.stats b{display:block;font-family:var(--f-mono);font-size:24px;font-weight:500}
+.stats span{font-size:13px;color:var(--muted)}
+@media (max-width:640px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.secgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.seccard{display:flex;flex-direction:column;gap:10px;padding:16px;text-decoration:none;color:var(--ink)}
+.seccard:hover{border-color:var(--accent)}
+.seccard h3{font-size:18px}
+.seccard p{margin:0;font-size:14px;color:var(--muted)}
+.bar{display:flex;height:8px;border-radius:4px;overflow:hidden;background:var(--sunk)}
+.bar i{display:block}
+.bar .b1{background:var(--ok)}.bar .b2{background:var(--info)}.bar .b3{background:var(--warn)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.mlbox{margin-top:28px;padding:20px;display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:24px;border-left:4px solid var(--accent)}
+@media (max-width:760px){.mlbox{grid-template-columns:1fr}}
+/* section */
+.sechead{display:flex;flex-direction:column;gap:6px;margin-bottom:18px}
+.filters{display:flex;gap:6px;flex-wrap:wrap;margin:14px 0 4px}
+.filters button{font:inherit;font-size:13px;padding:5px 11px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.filters button[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.group{margin-top:22px}
+.group>h2{font-size:15px;font-family:var(--f-body);font-weight:700;display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.mcard{display:flex;flex-direction:column;gap:8px;padding:14px 16px;text-decoration:none;color:var(--ink)}
+.mcard:hover{border-color:var(--accent)}
+.mcard .row{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.mcard h3{font-size:17px}
+.mcard .full{font-size:13px;color:var(--muted);margin-top:2px}
+.mcard .meta{font-size:13px;color:var(--muted)}
+.mcard .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:auto}
+.auc{font-family:var(--f-mono);font-size:13px;text-align:right;white-space:nowrap}
+.auc b{display:block;font-size:18px;font-weight:500;color:var(--ink)}
+.auc span{color:var(--muted);font-size:11px}
+.pipe{margin-top:30px;padding:18px}
+.pipe ol{margin:10px 0 0;padding-left:20px}
+.pipe li{margin:6px 0;font-size:14px}
+/* model sheet */
+.crumbs{font-size:13px;color:var(--muted);margin-bottom:10px}
+.crumbs a{color:var(--muted)}
+.sheet{padding:24px}
+.sheet header{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:16px}
+.sheet header h1{font-size:30px}
+.sheet header .full{color:var(--muted);margin-top:4px}
+.sheet .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.calcs{display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+.facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;padding:16px 0;border-bottom:1px solid var(--line)}
+.facts dt{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.facts dd{margin:3px 0 0;font-size:14px}
+@media (max-width:700px){.facts{grid-template-columns:1fr}.calcs{align-items:flex-start}}
+.block{padding:18px 0;border-bottom:1px solid var(--line)}
+.block:last-child{border-bottom:0}
+.block>h2{font-family:var(--f-body);font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:10px}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r)}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th,td{padding:8px 10px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+thead th{background:var(--sunk);font-weight:600;font-size:12.5px;white-space:nowrap}
+tbody tr:last-child td{border-bottom:0}
+td:first-child{font-weight:500}
+.score th:not(:first-child),.score td:not(:first-child){text-align:center}
+.cut{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:6px 16px;font-size:14px}
+.cut dt{font-family:var(--f-mono);font-weight:500}
+.cut dd{margin:0;color:var(--ink)}
+.refs{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px;font-size:14px}
+.refs .tag{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-right:6px}
+.evnote{font-size:13px;color:var(--muted);background:var(--sunk);border-radius:var(--r);padding:10px 12px;margin-top:10px}
+.notice{border:1px dashed var(--warn);color:var(--ink);background:var(--warn-soft);border-radius:var(--r);padding:12px 14px;font-size:14px}
+.related{display:flex;flex-wrap:wrap;gap:8px}
+.related a{border:1px solid var(--line);border-radius:var(--r);padding:6px 10px;text-decoration:none;color:var(--ink);font-size:14px;background:var(--bg)}
+.related a small{color:var(--muted);display:block;font-size:12px}
+/* dot plots */
+.dots{width:100%;overflow-x:auto}
+.dots svg{display:block;min-width:620px}
+.dots text{fill:var(--ink);font-family:var(--f-body);font-size:12px}
+.dots .ax text{fill:var(--muted);font-family:var(--f-mono);font-size:11px}
+.dots .grid line{stroke:var(--line)}
+.dots .lab{fill:var(--muted);font-size:11px}
+.dotlegend{display:flex;flex-wrap:wrap;gap:12px;font-size:13px;margin:10px 0}
+.dotlegend span{display:inline-flex;align-items:center;gap:6px}
+.dotlegend i{width:11px;height:11px;border-radius:50%;display:inline-block}
+.toggle{display:inline-flex;align-items:center;gap:8px;font-size:14px;cursor:pointer}
+.mltools{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.mltools .panel{padding:14px 16px;display:flex;flex-direction:column;gap:6px}
+.mltools h3{font-size:16px}
+.prose{max-width:72ch}
+.prose p,.prose li{font-size:15px}
+.foot{border-top:1px solid var(--line);padding-block:18px;font-size:13px;color:var(--muted)}
+@media (prefers-reduced-motion:no-preference){.mcard,.seccard{transition:border-color .15s}}
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#home"><b>Infection Model Tracker</b><span>Prognostic &amp; diagnostic models</span></a>
+    <nav class="nav" aria-label="Main">
+      <a href="#home" data-nav="home">Overview</a>
+      <a href="#compare" data-nav="compare">Comparisons</a>
+      <a href="#ml" data-nav="ml">ML &amp; AI</a>
+      <a href="#methods" data-nav="methods">Methods</a>
+    </nav>
+    <div class="search">
+      <input id="q" type="search" placeholder="Search models, e.g. qSOFA, malaria, neonate" autocomplete="off" aria-label="Search models">
+      <div class="results" id="qres" hidden></div>
+    </div>
+  </div>
+</header>
+<div class="wrap shell">
+  <aside class="rail" id="rail" aria-label="Outcomes"></aside>
+  <main id="main" tabindex="-1"></main>
+</div>
+<div class="wrap foot" id="foot"></div>
+
+<script>
+const D = /*__DATA__*/null;
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const M = Object.fromEntries(D.models.map(m => [m.id, m]));
+const S = Object.fromEntries(D.sections.map(s => [s.id, s]));
+const BUCKET = {inuse:'In use', validated:'Validated', developing:'New or under development'};
+const EV = {original:'Checked against original', abstract:'From original abstract', secondary:'Secondary source', pending:'Pending PDF', catalogue:'Catalogue entry'};
+const pm = id => id ? `https://pubmed.ncbi.nlm.nih.gov/${id}/` : '';
+const ref = id => D.refs[id];
+const cite = id => { const r = ref(id); return id ? `<a href="${pm(id)}" target="_blank" rel="noopener">${esc(r ? r.cite : 'PMID ' + id)}</a> <span class="muted mono">PMID ${id}</span>` : ''; };
+const bestAuc = m => { const v = m.performance.map(p => parseFloat(p.auc)).filter(x => !isNaN(x)); return v.length ? Math.max(...v) : null; };
+const lmicTag = m => m.lmic ? '<span class="chip lmic">Built for LMIC settings</span>' : '';
+const MODELCOL = {sofa:'--c1', apache2:'--c2', qsofa:'--c3', saps2:'--c4', sirs:'--c5', meds:'--c6', news2:'--c7', mews:'--c8'};
+
+function rail(active){
+  const groups = {};
+  D.sections.forEach(s => (groups[s.group] = groups[s.group] || []).push(s));
+  $('#rail').innerHTML = Object.entries(groups).map(([g, L]) => `<h4>${esc(g)}</h4><div class="railgrid">` + L.map(s => {
+    const n = D.models.filter(m => m.section === s.id).length;
+    return `<a href="#s-${s.id}" ${active === s.id ? 'aria-current="page"' : ''}>${esc(s.title)}<span>${n}</span></a>`; }).join('') + '</div>').join('')
+    + `<h4>Cross-cutting</h4><div class="railgrid"><a href="#ml" ${active==='ml'?'aria-current="page"':''}>ML &amp; AI models<span>${D.ml_tools.length}</span></a><a href="#compare" ${active==='compare'?'aria-current="page"':''}>Head-to-head comparisons<span>${D.stats.h2h_studies}</span></a></div>`;
+}
+
+function home(){
+  const st = D.stats;
+  let h = `<p class="eyebrow">Sepsis, severe infection and febrile illness</p>
+  <h1 style="font-size:34px;max-width:22ch">Clinical prediction models, by the outcome they predict</h1>
+  <p class="lede">Scores, rules and models in use or in development for adults, children and newborns, with components, cut-offs, original articles, latest performance and online calculators. Updated once a year.</p>
+  <div class="stats">
+    <div><b>${st.models}</b><span>models catalogued</span></div>
+    <div><b>${st.curated}</b><span>with full model sheets</span></div>
+    <div><b>${st.h2h_results}</b><span>head-to-head AUC results</span></div>
+    <div><b>${st.searched.toLocaleString()}</b><span>PubMed records screened</span></div>
+  </div>
+  <div class="legend" style="margin-bottom:10px"><span><i style="background:var(--ok)"></i>In use</span><span><i style="background:var(--info)"></i>Validated</span><span><i style="background:var(--warn)"></i>New or under development</span></div>
+  <div class="secgrid">`;
+  D.sections.forEach(s => {
+    const L = D.models.filter(m => m.section === s.id); const c = k => L.filter(m => m.bucket === k).length;
+    const p = D.pipeline[s.id];
+    h += `<a class="panel seccard" href="#s-${s.id}"><span class="eyebrow">${esc(s.group)}</span><h3>${esc(s.title)}</h3><p>${esc(s.predicts)}</p>
+      <div class="bar" role="img" aria-label="${c('inuse')} in use, ${c('validated')} validated, ${c('developing')} new or developing">
+        <i class="b1" style="flex:${c('inuse')}"></i><i class="b2" style="flex:${c('validated')}"></i><i class="b3" style="flex:${c('developing')}"></i></div>
+      <span class="muted mono" style="font-size:12px">${L.length} models · ${c('inuse')} in use${p ? ` · ${p.n} new models with external validation since 2023` : ''}</span></a>`;
+  });
+  h += `</div>`;
+  const ml = D.ml;
+  h += `<section class="panel mlbox"><div><p class="eyebrow">Machine learning &amp; AI</p><h2 style="font-size:22px;margin:4px 0 8px">${ml.dev_ext.toLocaleString()} ML models developed and externally validated</h2>
+    <p class="muted" style="margin:0 0 12px">Most are single-centre and few are deployed. Eight tools are in clinical use or regulator-cleared, including the Epic Sepsis Model, TREWS, Sepsis ImmunoScore and TriVerity.</p>
+    <a class="btn" href="#ml">See ML &amp; AI models</a></div><div>${mlChart(ml.byyear)}</div></section>`;
+  return h;
+}
+
+function mlChart(by){
+  const ys = Object.keys(by).map(Number), vs = ys.map(y => by[y]), max = Math.max(...vs);
+  const W = 420, H = 170, pl = 34, pb = 22, bw = (W - pl - 6) / ys.length;
+  const nice = Math.ceil(max / 200) * 200, ticks = [0, nice / 2, nice];
+  let s = `<div class="dots"><svg viewBox="0 0 ${W} ${H}" style="min-width:0;width:100%" role="img" aria-label="ML prediction-model development papers per year">`;
+  s += `<g class="grid">${ticks.map(t => { const y = H - pb - (t / nice) * (H - pb - 10); return `<line x1="${pl}" x2="${W}" y1="${y}" y2="${y}"/>`; }).join('')}</g>`;
+  s += `<g class="ax">${ticks.map(t => { const y = H - pb - (t / nice) * (H - pb - 10); return `<text x="${pl - 4}" y="${y + 4}" text-anchor="end">${t}</text>`; }).join('')}</g>`;
+  ys.forEach((y, i) => { const h = (vs[i] / nice) * (H - pb - 10), x = pl + i * bw + 2;
+    s += `<rect x="${x}" y="${H - pb - h}" width="${bw - 4}" height="${h}" rx="2" fill="var(${i === ys.length - 1 ? '--warn' : '--accent'})"><title>${y}: ${vs[i]}</title></rect>`;
+    if (i % 2 === 0 || i === ys.length - 1) s += `<g class="ax"><text x="${x + (bw - 4) / 2}" y="${H - 6}" text-anchor="middle">${String(y).slice(2)}</text></g>`; });
+  return s + `</svg></div><p class="muted" style="font-size:12px;margin:4px 0 0">ML model development papers per year in the search (2026 to 14 October).</p>`;
+}
+
+function card(m){
+  const a = bestAuc(m);
+  const p = m.performance.find(x => parseFloat(x.auc) === a);
+  return `<a class="panel mcard" href="#m-${m.id}">
+    <div class="row"><div><h3>${esc(m.name)}</h3>${m.full ? `<div class="full">${esc(m.full)}</div>` : ''}</div>
+    ${a != null ? `<div class="auc"><b>${a.toFixed(2)}</b><span>top AUC</span></div>` : ''}</div>
+    <div class="meta">${esc(m.type)}${m.population ? ' · ' + esc(m.population) : ''}</div>
+    <div class="chips"><span class="chip ${m.bucket}">${esc(m.status || BUCKET[m.bucket])}</span><span class="chip ev-${m.evidence}">${EV[m.evidence]}</span>${lmicTag(m)}${m.calculators.length ? '<span class="chip lmic">Calculator</span>' : ''}</div></a>`;
+}
+
+let secFilter = 'all';
+function section(id){
+  const s = S[id]; if (!s) return notFound();
+  const L = D.models.filter(m => m.section === id);
+  const f = secFilter;
+  const vis = L.filter(m => f === 'all' || (f === 'lmic' ? m.lmic : f === 'calc' ? m.calculators.length : f === 'detail' ? m.evidence !== 'catalogue' : true));
+  let h = `<div class="sechead"><p class="eyebrow">${esc(s.group)}</p><h1 style="font-size:30px">${esc(s.title)}</h1><p class="lede">${esc(s.predicts)}</p></div>
+   <div class="filters" role="group" aria-label="Filter models">${[['all','All ' + L.length],['detail','Full model sheet'],['calc','Has calculator'],['lmic','Built for LMIC settings']].map(([k, t]) => `<button type="button" data-f="${k}" aria-pressed="${f === k}">${t}</button>`).join('')}</div>`;
+  ['inuse', 'validated', 'developing'].forEach(b => {
+    const G = vis.filter(m => m.bucket === b).sort((x, y) => (x.evidence === 'catalogue') - (y.evidence === 'catalogue') || x.name.localeCompare(y.name));
+    if (!G.length) return;
+    h += `<section class="group"><h2><span class="chip ${b}">${BUCKET[b]}</span><span class="muted mono" style="font-weight:400">${G.length}</span></h2><div class="cards">${G.map(card).join('')}</div></section>`;
+  });
+  if (!vis.length) h += `<p class="muted" style="margin-top:20px">No models match this filter.</p>`;
+  const p = D.pipeline[id];
+  if (p) h += `<section class="panel pipe"><p class="eyebrow">Under development</p><h2 style="font-size:19px;margin-top:4px">${p.n} new models since 2023 with external validation</h2>
+    <p class="muted" style="margin:6px 0 0;font-size:14px">${p.ml} use machine learning; ${p.lmic} come from low- or middle-income settings. Classified automatically from the October 2026 search, so treat as a pointer to the literature, not an endorsement. Most recent:</p>
+    <ol>${p.recent.map(r => `<li><a href="${pm(r.pmid)}" target="_blank" rel="noopener">${esc(r.title)}</a> <span class="muted">${esc(r.fa)} ${r.year}, ${esc(r.journal)}${r.ml ? ' · ML' : ''}${r.lmic ? ' · LMIC' : ''}</span></li>`).join('')}</ol></section>`;
+  return h;
+}
+
+function compTable(c){
+  if (!c) return '';
+  if (typeof c === 'string') return `<p style="margin:0;max-width:75ch">${esc(c)}</p>`;
+  const score = c.head.length > 2;
+  return `<div class="tablewrap"><table class="${score ? 'score' : ''}"><thead><tr>${c.head.map(x => `<th scope="col">${esc(x)}</th>`).join('')}</tr></thead><tbody>${c.rows.map(r => `<tr>${r.map(x => `<td>${esc(x)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+}
+
+function model(id){
+  const m = M[id]; if (!m) return notFound();
+  const s = S[m.section];
+  let h = `<div class="crumbs"><a href="#home">Overview</a> / <a href="#s-${s.id}">${esc(s.title)}</a></div><article class="panel sheet"><header><div>
+    <h1>${esc(m.name)}</h1>${m.full ? `<div class="full">${esc(m.full)}</div>` : ''}
+    <div class="chips"><span class="chip ${m.bucket}">${esc(m.status)}</span><span class="chip ev-${m.evidence}">${EV[m.evidence]}</span>${lmicTag(m)}</div></div>
+    <div class="calcs">${m.calculators.map((c, i) => `<a class="btn ${i ? 'ghost' : ''}" href="${esc(c.url)}" target="_blank" rel="noopener">${esc(c.label)} ↗</a>`).join('') || '<span class="muted" style="font-size:13px">No validated online calculator found</span>'}</div></header>
+    <dl class="facts"><div><dt>Predicts</dt><dd>${esc(m.predicts || '–')}</dd></div><div><dt>Population</dt><dd>${esc(m.population || '–')}</dd></div><div><dt>Model type</dt><dd>${esc(m.type || '–')}</dd></div></dl>`;
+  if (m.evidence === 'catalogue') h += `<div class="block"><div class="notice">This model is catalogued but its full sheet (components, cut-offs and performance) is still being prepared from the original article.${m.papers ? ` It appears in ${m.papers} papers in the October 2026 search.` : ''}</div>${m.evnote ? `<p class="evnote">${esc(m.evnote)}</p>` : ''}</div>`;
+  if (m.components) h += `<section class="block"><h2>Components</h2>${compTable(m.components)}${m.scoring ? `<p style="margin:10px 0 0;font-size:14px;max-width:80ch"><b>Scoring.</b> ${esc(m.scoring)}</p>` : ''}</section>`;
+  else if (m.scoring) h += `<section class="block"><h2>Scoring</h2><p style="margin:0">${esc(m.scoring)}</p></section>`;
+  if (m.cutoffs.length) h += `<section class="block"><h2>Cut-offs and interpretation</h2><dl class="cut">${m.cutoffs.map(c => `<dt>${esc(c.at)}</dt><dd>${esc(c.means)}</dd>`).join('')}</dl></section>`;
+  if (m.performance.length) h += `<section class="block"><h2>Performance (discrimination)</h2><div class="tablewrap"><table><thead><tr><th>AUC</th><th>95% CI</th><th>Outcome</th><th>Setting</th><th>Source</th></tr></thead><tbody>
+    ${m.performance.map(p => `<tr><td class="mono">${esc(p.auc)}</td><td class="mono">${esc(p.ci || '–')}</td><td>${esc(p.outcome)}</td><td>${esc(p.setting)}</td><td>${p.pmid ? `<a href="${pm(p.pmid)}" target="_blank" rel="noopener">${esc(ref(p.pmid)?.cite || 'PMID ' + p.pmid)}</a>` : ''}</td></tr>`).join('')}</tbody></table></div>
+    <p class="muted" style="font-size:12.5px;margin:8px 0 0">AUCs from different studies are not directly comparable: outcomes, timing and case mix differ. See head-to-head studies below for within-study comparisons.</p></section>`;
+  const o = m.originator;
+  if (o.pmid || o.label || m.updates.length) h += `<section class="block"><h2>Original article and updates</h2><ul class="refs">
+    ${o.pmid || o.label ? `<li><span class="tag">Original</span>${o.pmid ? cite(o.pmid) : esc(o.label)}${ref(o.pmid) ? `<br><span class="muted">${esc(ref(o.pmid).title)}</span>` : ''}</li>` : ''}
+    ${m.updates.map(u => `<li><span class="tag">Update</span>${cite(u.pmid)}${u.label ? ` <span class="muted">– ${esc(u.label.replace(/^[^:]*:\s*/, ''))}</span>` : (ref(u.pmid) ? `<br><span class="muted">${esc(ref(u.pmid).title)}</span>` : '')}</li>`).join('')}</ul></section>`;
+  if (m.gold) h += `<section class="block"><h2>Outcome definition in the original study</h2><p style="margin:0;max-width:80ch">${esc(m.gold)}</p></section>`;
+  const studies = D.h2h.filter(s => s.results.some(r => r.id === m.id));
+  if (studies.length) h += `<section class="block"><h2>Head-to-head studies including ${esc(m.name)} (${studies.length})</h2>${dotplot(studies, m.id, true)}<p class="muted" style="font-size:12.5px;margin:6px 0 0">Each row is one study; dots on the same row were tested in the same patients. Hollow dots are combined or new models. From abstracts in the source PubMed file; <a href="#compare">see all comparisons</a>.</p></section>`;
+  if (m.related.length) h += `<section class="block"><h2>Similar and related tools</h2><div class="related">${m.related.filter(r => M[r.id]).map(r => `<a href="#m-${r.id}">${esc(M[r.id].name)}${r.note ? `<small>${esc(r.note)}</small>` : ''}</a>`).join('')}</div></section>`;
+  if (m.evnote && m.evidence !== 'catalogue') h += `<p class="evnote"><b>Source check.</b> ${esc(m.evnote)}</p>`;
+  return h + '</article>';
+}
+
+let showCombo = false;
+function dotplot(studies, focus, compact){
+  const rows = studies.map(s => ({s, rs: s.results.filter(r => showCombo || !r.combo || focus)}));
+  const lw = 230, W = 760, rh = 26, top = 24, h = top + rows.length * rh + 26, lo = 0.5, hi = 1.0;
+  const x = v => lw + (Math.max(lo, Math.min(hi, v)) - lo) / (hi - lo) * (W - lw - 20);
+  const ticks = [0.5, 0.6, 0.7, 0.8, 0.9, 1.0];
+  let svg = `<svg viewBox="0 0 ${W} ${h}" role="img" aria-label="AUC dot plot"><g class="grid">${ticks.map(t => `<line x1="${x(t)}" x2="${x(t)}" y1="${top - 6}" y2="${h - 22}"/>`).join('')}</g>
+   <g class="ax">${ticks.map(t => `<text x="${x(t)}" y="${top - 10}" text-anchor="middle">${t.toFixed(1)}</text>`).join('')}<text x="${x(1)}" y="${h - 6}" text-anchor="end">AUC →</text></g>`;
+  rows.forEach(({s, rs}, i) => {
+    const y = top + i * rh + rh / 2;
+    svg += `<a href="${pm(s.pmid)}" target="_blank" rel="noopener"><text x="0" y="${y - 2}">${esc(s.author)} ${s.year}</text><text class="lab" x="0" y="${y + 11}">${esc((s.setting + ', n=' + s.n.toLocaleString()).slice(0, 38))}</text></a>`;
+    rs.forEach(r => { const col = r.id && MODELCOL[r.id] ? `var(${MODELCOL[r.id]})` : 'var(--cx)'; const big = r.id === focus;
+      svg += r.combo ? `<circle cx="${x(r.auc)}" cy="${y}" r="5" fill="var(--surface)" stroke="var(--cx)" stroke-width="1.5"><title>${esc(r.model)}: ${r.auc}</title></circle>`
+        : `<circle cx="${x(r.auc)}" cy="${y}" r="${big ? 7 : 5.5}" fill="${col}" ${big ? 'stroke="var(--ink)" stroke-width="1.5"' : ''}><title>${esc(r.model)}: ${r.auc}${r.derived ? ' (derived)' : ''}</title></circle>`; });
+  });
+  svg += '</svg>';
+  const used = [...new Set(studies.flatMap(s => s.results.filter(r => r.id && MODELCOL[r.id]).map(r => r.id)))];
+  return `<div class="dotlegend">${used.map(id => `<span><i style="background:var(${MODELCOL[id]})"></i>${esc(M[id].name)}</span>`).join('')}<span><i style="background:var(--surface);border:1.5px solid var(--cx)"></i>Combined or new model</span></div><div class="dots">${svg}</div>`;
+}
+
+function compare(){
+  let h = `<p class="eyebrow">Within-study comparisons</p><h1 style="font-size:30px">Head-to-head comparisons</h1>
+   <p class="lede">${D.stats.h2h_results} AUC results from ${D.stats.h2h_studies} studies that tested two or more tools in the same patients. Each row is one study; compare dots along a row, not between rows.</p>
+   <p style="margin:14px 0"><label class="toggle"><input type="checkbox" id="combo" ${showCombo ? 'checked' : ''}> Show combined models (score plus biomarker, new nomograms)</label></p>`;
+  ['Mortality', 'Sepsis diagnosis or onset', 'Other outcomes'].forEach(g => {
+    const L = D.h2h.filter(s => s.group === g && s.results.some(r => showCombo || !r.combo)).filter(s => s.results.filter(r => showCombo || !r.combo).length);
+    if (!L.length) return;
+    L.sort((a, b) => b.year - a.year);
+    h += `<section class="panel" style="padding:18px;margin-top:16px"><h2 style="font-size:19px">${esc(g)} <span class="muted mono" style="font-size:14px;font-weight:400">${L.length} studies</span></h2>${dotplot(L, null)}</section>`;
+  });
+  h += `<p class="muted" style="font-size:13px;margin-top:16px">Source: abstracts of the 82 head-to-head papers in the original PubMed file (extraction 14 Oct 2026). 25 further papers report comparisons only in the full text and will be added once PDFs are available. Small single-centre studies with very high AUCs are likely optimistic.</p>`;
+  return h;
+}
+
+function ml(){
+  const m = D.ml;
+  let h = `<p class="eyebrow">Machine learning &amp; AI</p><h1 style="font-size:30px">ML and AI models</h1>
+   <p class="lede">Tools in clinical use or cleared by a regulator, and the much larger pipeline of models under development.</p>
+   <h2 style="font-size:20px;margin:26px 0 12px">In use or regulator-cleared</h2><div class="mltools">${D.ml_tools.map(t => `<div class="panel"><span class="eyebrow">${esc(t.kind)}</span><h3>${esc(t.name)}</h3>
+     <span class="chip ${/FDA|cleared|authorised/i.test(t.status) ? 'validated' : 'inuse'}" style="align-self:flex-start">${esc(t.status)}</span><p style="margin:4px 0;font-size:14px">${esc(t.note)}</p>
+     <a href="${pm(t.pmid)}" target="_blank" rel="noopener" style="font-size:13px">${esc(ref(t.pmid)?.cite || 'PMID ' + t.pmid)}</a></div>`).join('')}</div>
+   <section class="panel" style="padding:18px;margin-top:24px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px" id="mlpipe">
+     <div><p class="eyebrow">Pipeline</p><h2 style="font-size:20px;margin:4px 0 8px">${m.total.toLocaleString()} papers use ML; ${m.dev_ext.toLocaleString()} develop a model and validate it externally</h2>
+     <p class="muted" style="font-size:14px">Common problems: single-centre data (often MIMIC or eICU), no calibration, no comparison with simple scores, and no prospective evaluation.</p></div><div>${mlChart(m.byyear)}</div></section>
+   <h2 style="font-size:20px;margin:26px 0 8px">Recent externally validated ML models for sepsis</h2><ol class="pipe" style="padding-left:20px">${m.recent.map(r => `<li style="margin:6px 0;font-size:14px"><a href="${pm(r.pmid)}" target="_blank" rel="noopener">${esc(r.title)}</a> <span class="muted">${esc(r.fa)} ${r.year}, ${esc(r.journal)}${r.lmic ? ' · LMIC' : ''}</span></li>`).join('')}</ol>`;
+  return h;
+}
+
+function methods(){
+  return `<div class="prose"><p class="eyebrow">How this site is built</p><h1 style="font-size:30px">Methods and update policy</h1>
+  <h2 style="font-size:19px;margin:22px 0 6px">Scope</h2><p>Prognostic and diagnostic models for acute infection, sepsis and febrile-illness severity in adults, children and newborns, in high- and low-resource settings. Proprietary and machine learning tools are listed separately.</p>
+  <h2 style="font-size:19px;margin:22px 0 6px">Sources</h2><ul>
+   <li>A PubMed search on sepsis and severity biomarkers (1,540 records), which supplied the head-to-head comparison data.</li>
+   <li>A dedicated PubMed search for prediction-model papers run on 14 October 2026: ${D.stats.searched.toLocaleString()} records. It retrieved 42 of 48 known original model papers (88%); the 6 missed were added by hand.</li>
+   <li>Named models were mined from the abstracts, reviewed by hand and added to the catalogue. Papers were classified automatically as development, external validation, comparison or review.</li></ul>
+  <h2 style="font-size:19px;margin:22px 0 6px">What the source labels mean</h2><ul>
+   <li><span class="chip ev-original">${EV.original}</span> Components and cut-offs were copied from the tables of the original article.</li>
+   <li><span class="chip ev-abstract">${EV.abstract}</span> Details come from the original article's abstract; full tables still to be checked.</li>
+   <li><span class="chip ev-secondary">${EV.secondary}</span> Standard published version (guideline, review or later paper) not yet checked against the original.</li>
+   <li><span class="chip ev-pending">${EV.pending}</span> Waiting for the original PDF.</li></ul>
+  <h2 style="font-size:19px;margin:22px 0 6px">Reading performance figures</h2><p>The AUC (C-statistic) measures discrimination only. Values from different studies are not comparable because outcomes, timing and case mix differ; use the head-to-head plots for fair comparisons. Calibration is rarely reported and is not shown yet.</p>
+  <h2 style="font-size:19px;margin:22px 0 6px">Updates</h2><p>Last updated ${esc(D.updated)}. The site is updated once a year (next: ${esc(D.nextUpdate)}) or on request, by re-running the same search from the last update date.</p>
+  <h2 style="font-size:19px;margin:22px 0 6px">Not for direct clinical use</h2><p>This is a research reference. Check scores against the original publication and local guidance before using them in patient care.</p></div>`;
+}
+
+function notFound(){ return `<h1>Page not found</h1><p><a href="#home">Back to the overview</a></p>`; }
+
+function route(){
+  const h = (location.hash || '#home').slice(1);
+  let html, active = '', nav = '';
+  if (h.startsWith('s-')) { html = section(h.slice(2)); active = h.slice(2); }
+  else if (h.startsWith('m-')) { html = model(h.slice(2)); active = M[h.slice(2)]?.section; }
+  else if (h === 'compare') { html = compare(); active = nav = 'compare'; }
+  else if (h === 'ml') { html = ml(); active = nav = 'ml'; }
+  else if (h === 'methods') { html = methods(); nav = 'methods'; }
+  else { html = home(); nav = 'home'; }
+  $('#main').innerHTML = html;
+  rail(active);
+  document.querySelectorAll('[data-nav]').forEach(a => { if (a.dataset.nav === nav) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
+  window.scrollTo(0, 0);
+}
+
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-f]');
+  if (b) { secFilter = b.dataset.f; try { localStorage.setItem('imt-filter', secFilter); } catch (_) {} route(); }
+});
+document.addEventListener('change', e => { if (e.target.id === 'combo') { showCombo = e.target.checked; route(); } });
+window.addEventListener('hashchange', () => { $('#qres').hidden = true; route(); });
+
+// search
+const q = $('#q'), qres = $('#qres'); let sel = -1;
+q.addEventListener('input', () => {
+  const t = q.value.trim().toLowerCase(); sel = -1;
+  if (t.length < 2) { qres.hidden = true; return; }
+  const hits = D.models.map(m => { const hay = [m.name, m.full, m.population, m.type, S[m.section].title, m.predicts].join(' ').toLowerCase();
+    const score = m.name.toLowerCase().startsWith(t) ? 3 : m.name.toLowerCase().includes(t) ? 2 : hay.includes(t) ? 1 : 0; return {m, score}; })
+    .filter(x => x.score).sort((a, b) => b.score - a.score || (a.m.evidence === 'catalogue') - (b.m.evidence === 'catalogue')).slice(0, 10);
+  qres.innerHTML = hits.length ? hits.map(({m}) => `<a href="#m-${m.id}">${esc(m.name)}<small>${esc(S[m.section].title)}</small></a>`).join('') : '<a aria-disabled="true">No matching models<small>Try a disease, setting or score name</small></a>';
+  qres.hidden = false;
+});
+q.addEventListener('keydown', e => {
+  const items = [...qres.querySelectorAll('a[href]')];
+  if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); sel = Math.max(0, Math.min(items.length - 1, sel + (e.key === 'ArrowDown' ? 1 : -1))); items.forEach((a, i) => a.classList.toggle('sel', i === sel)); }
+  if (e.key === 'Enter' && items.length) { location.hash = items[Math.max(0, sel)].getAttribute('href'); q.value = ''; qres.hidden = true; }
+  if (e.key === 'Escape') qres.hidden = true;
+});
+document.addEventListener('click', e => { if (!e.target.closest('.search')) qres.hidden = true; });
+
+try { secFilter = localStorage.getItem('imt-filter') || 'all'; } catch (_) {}
+$('#foot').innerHTML = `Infection Model Tracker · last updated ${esc(D.updated)} · next update ${esc(D.nextUpdate)} · research reference, not for direct clinical use · <a href="#methods">Methods</a>`;
+route();
+</script>

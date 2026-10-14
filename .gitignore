@@ -1,0 +1,12 @@
+# Kept locally, not published
+Prediction_Model_Gap_Analysis.xlsx
+pdfs/
+data/pubmed_corpus_*.jsonl
+data/classified.json
+build/src/pmc/
+build/src/abstracts*.json
+build/src/refs.json
+build/artifact.html
+__pycache__/
+*.pyc
+~$*

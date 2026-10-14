@@ -1,0 +1,78 @@
+serial	author	year	setting	age	n	outcome	model	auc	ci	value_type	note
+7	Ristori	2026	Hospital	Adult	477	In-hospital mortality	ML model (clinical+biomarker)	0.90		reported	Score AUCs not in abstract; NEED FULL TEXT for SOFA/qSOFA comparators
+40	Zhang	2025	Hospital	Adult	81	28-day mortality	LASSO nomogram (PCT, CRP, lactate, LCR, TLR4, PPARG SNPs)	0.885	0.812-0.943	reported	
+40	Zhang	2025	Hospital	Adult	81	28-day mortality	SOFA	0.756		derived	Derived from reported delta-AUC 0.129 (DeLong p=0.004)
+40	Zhang	2025	Hospital	Adult	81	28-day mortality	APACHE II	0.781		derived	Derived from reported delta-AUC 0.104 (p=0.009)
+137	Carpio	2015	ED	Adult	123	30-day mortality	Presepsin + MEDS	0.878		reported	MEDS and APACHE II alone "similar" to presepsin (0.743); NEED FULL TEXT
+146	Leng	2026	Hospital	Adult	399	30-day mortality	NMI biomarker	0.86		reported	Scores (APACHE II, SOFA, qSOFA) lower but no values; NEED FULL TEXT
+149	Zhao	2020	ICU	Adult	225	In-hospital mortality (sepsis-ARDS)	SOFA	0.77		reported	
+149	Zhao	2020	ICU	Adult	225	In-hospital mortality (sepsis-ARDS)	SOFA + presepsin	0.87		reported	
+149	Zhao	2020	ICU	Adult	225	In-hospital mortality (sepsis-ARDS)	APACHE II	0.73		reported	
+149	Zhao	2020	ICU	Adult	225	In-hospital mortality (sepsis-ARDS)	APACHE II + presepsin	0.85		reported	
+204	Wang	2025	Hospital	Adult	180	30-day mortality	SOFA	0.706	0.624-0.789	reported	
+204	Wang	2025	Hospital	Adult	180	30-day mortality	APACHE II	0.784	0.714-0.854	reported	
+296	Liu	2026	ICU	Adult	90	Sepsis-associated AKI within 7 days	HDAC3 biomarker	0.820	0.732-0.908	reported	Higher than SOFA (value not given); NEED FULL TEXT
+336	Ozdemir	2026	ED	Adult	180	30-day mortality	S-S.M.A.R.T score	0.718		reported	
+336	Ozdemir	2026	ED	Adult	180	30-day mortality	SOFA	0.735		reported	p=0.701 vs S-S.M.A.R.T
+336	Ozdemir	2026	ED	Adult	180	30-day mortality	SSMART-MC (S-S.M.A.R.T + malignancy + CRP)	0.867		reported	Sens 87.3%, spec 72.0%; new model, no external validation
+358	Tan	2026	ICU	Adult	107	28-day mortality	APACHE II	0.710		reported	
+358	Tan	2026	ICU	Adult	107	28-day mortality	SOFA	0.789		reported	
+358	Tan	2026	ICU	Adult	107	28-day mortality	SOFA + monocyte TLR5	0.803		reported	
+397	Gu	2026	ED	Adult	177	28-day mortality	SOFA	0.839		reported	Cut-off 7.5: sens 57.3%, spec 96.2%
+397	Gu	2026	ED	Adult	177	28-day mortality	APACHE II	0.773		reported	Cut-off 21.5: sens 55.6%, spec 92.5%
+397	Gu	2026	ED	Adult	177	28-day mortality	SOFA + MIP-3beta	0.86		reported	
+399	Zeng	2026	Hospital	Adult	341	Development of sepsis (pyogenic liver abscess)	NEWS2	0.724	0.635-0.813	reported	
+399	Zeng	2026	Hospital	Adult	341	Development of sepsis (pyogenic liver abscess)	NEWS2 + procalcitonin/albumin ratio	0.798	0.726-0.871	reported	
+564	Lin	2022	ED	Older adults (>=60)	2610	Sepsis diagnosis (Sepsis-3)	NEWS + MDW + WBC + NLR	0.842		reported	NEWS>=5 and MEWS>=3: higher sens, low spec; qSOFA>=2: low sens, high spec. Single-score AUCs in full text
+564	Lin	2022	ED	Older adults (>=60)	2610	Sepsis diagnosis (Sepsis-3)	MEWS + MDW + WBC + NLR	0.842		reported	MEWS>=3, WBC>=11, NLR>=8, MDW>=20
+564	Lin	2022	ED	Older adults (>=60)	2610	Sepsis diagnosis (Sepsis-3)	qSOFA + MDW + WBC + NLR	0.826		reported	
+606	Teng	2019	ED	Adult (influenza)	364	28-day mortality	MEDS	0.817	0.756-0.878	reported	
+606	Teng	2019	ED	Adult (influenza)	364	28-day mortality	SOFA	0.837	0.779-0.894	reported	
+606	Teng	2019	ED	Adult (influenza)	364	28-day mortality	MEDS + PCT	0.857	0.809-0.905	reported	
+608	Liu	2019	ICU (MIMIC-III)	Adult	1865	Mortality	qSOFA	0.547	0.521-0.574	reported	Worst score in first 24 h
+608	Liu	2019	ICU (MIMIC-III)	Adult	1865	Mortality	SOFA	0.686	0.661-0.710	reported	
+643	Ho	2017	ICU	Adult (with and without infection)	2322	ICU/hospital mortality	qSOFA	0.672	0.638-0.707	reported	Brier 0.099; comparable to SAPS III, MPM0-III, APACHE II, SOFA (values in full text)
+643	Ho	2017	ICU	Adult (with and without infection)	2322	ICU/hospital mortality	qSOFA + lactate	0.730	0.694-0.765	reported	Brier 0.097; comparable to full SOFA
+683	Li	2014	ICU	Adult	102	28-day mortality	SOFA	0.953		reported	Small sample; implausibly high, flag for bias
+683	Li	2014	ICU	Adult	102	28-day mortality	APACHE II	0.923		reported	
+697	Suberviola	2013	ICU	Adult	137	In-hospital mortality	APACHE II	0.82		reported	Adding suPAR/proADM did not improve AUC
+697	Suberviola	2013	ICU	Adult	137	In-hospital mortality	SOFA	0.75		reported	
+700	Kiguchi	2013	ICU	Adult	132	28-day mortality	APACHE II	0.836		reported	
+700	Kiguchi	2013	ICU	Adult	132	28-day mortality	SOFA	0.807		reported	
+754	Talkar	2025	Hospital (India)	Adult	196	30-day mortality	NEWS	0.861	0.81-0.92	reported	Bacteraemic subgroup NEWS 0.94
+754	Talkar	2025	Hospital (India)	Adult	196	30-day mortality	SOFA	0.738	0.65-0.82	reported	Non-bacteraemic subgroup SOFA 0.852; MEWS and SAPS II in full text
+806	Wu	2025	ICU	Adult	116	28-day mortality	SOFA	0.684		reported	APACHE II higher than NINJ1 (value in full text)
+806	Wu	2025	ICU	Adult	116	28-day mortality	SOFA + NINJ1	0.773		reported	
+828	Ishikawa	2021	ED/ICU (Japan)	Adult	161	Multiple organ dysfunction on day 2	qSOFA (day 0)	0.728	0.651-0.794	reported	
+828	Ishikawa	2021	ED/ICU (Japan)	Adult	161	Multiple organ dysfunction on day 2	qSOFA (day 0) + IL-6 (day 1)	0.842	0.771-0.893	reported	
+828	Ishikawa	2021	ED/ICU (Japan)	Adult	161	Multiple organ dysfunction on day 2	qSOFA (day 1) + IL-6 (day 1)	0.868	0.799-0.915	reported	
+845	Perez-San Martin	2020	ICU	Adult (septic shock)	75	In-hospital mortality	SAPS II	0.81		reported	
+845	Perez-San Martin	2020	ICU	Adult (septic shock)	75	In-hospital mortality	SOFA	0.79		reported	
+845	Perez-San Martin	2020	ICU	Adult (septic shock)	75	In-hospital mortality	APACHE II	0.73		reported	
+845	Perez-San Martin	2020	ICU	Adult (septic shock)	75	In-hospital mortality	SAPS II + PTX3	0.814		reported	
+1033	Zhao	2025	ICU (MIMIC-IV/eICU)	Adult	8215	SA-AKI prognosis (mortality)	SOFA + SAPS II + platelet/haemoglobin ratio	0.906		reported	Component-score AUCs in full text
+1101	Guliciuc	2023	Hospital (urology, Romania)	Adult	174	In-hospital mortality (urosepsis)	qSOFA	0.903		reported	Highest AUC; SOFA sens 76.8%/spec 91.3% (AUC in full text)
+1142	Yu	2019	Hospital (multicentre)	Adult	1318	30-day mortality	SIRS	0.56		reported	
+1142	Yu	2019	Hospital (multicentre)	Adult	1318	30-day mortality	qSOFA	0.67		reported	
+1142	Yu	2019	Hospital (multicentre)	Adult	1318	30-day mortality	qSOFA + PCT (qSOFA_PCT)	0.73		reported	PCT points: <0.25=0, 0.25-2=1, >2=2; NRI 35%; sens 86.5%
+1154	Dat	2018	Hospital (Vietnam, LMIC)	Adult (bloodstream infection)	393	In-hospital mortality	SOFA (critical care admissions)	0.858	0.793-0.922	reported	
+1154	Dat	2018	Hospital (Vietnam, LMIC)	Adult (bloodstream infection)	393	In-hospital mortality	SOFA (ward admissions)	0.667	0.577-0.758	reported	
+1154	Dat	2018	Hospital (Vietnam, LMIC)	Adult (bloodstream infection)	393	In-hospital mortality	qSOFA (critical care admissions)	0.692	0.605-0.780	reported	
+1154	Dat	2018	Hospital (Vietnam, LMIC)	Adult (bloodstream infection)	393	In-hospital mortality	qSOFA (ward admissions)	0.527	0.424-0.630	reported	
+1205	Xiao	2015	ICU	Adult	192	Mortality	SOFA	0.813		reported	
+1205	Xiao	2015	ICU	Adult	192	Mortality	SOFA + alpha-1-acid glycoprotein	0.878		reported	
+1219	Mihajlovic	2014	ICU	Adult	60	Organ failure	APACHE II	0.55		reported	
+1219	Mihajlovic	2014	ICU	Adult	60	Organ failure	SOFA	0.57		reported	
+1081	Pluta	2024	ICU (Poland)	Adult (septic shock)	55	ICU mortality	APACHE II + CRP + S100B	0.95	0.85-0.99	reported	Single-score AUCs in full text
+1231	Wilhelm	2012	ED (Germany)	Adult	211	30-day mortality	APACHE II	0.801		reported	
+1231	Wilhelm	2012	ED (Germany)	Adult	211	30-day mortality	MEDS	0.785		reported	
+1231	Wilhelm	2012	ED (Germany)	Adult	211	30-day mortality	SOFA	0.708		reported	
+1239	Su	2011	ICU	Adult	104	Sepsis vs SIRS diagnosis	APACHE II	0.722	0.586-0.858	reported	
+1308	Wu	2025	ICU	Adult	139	28-day mortality	SIC score	0.773		reported	
+1308	Wu	2025	ICU	Adult	139	28-day mortality	SIC score + heparin-binding protein	0.844		reported	
+1363	Seol	2020	ICU (Korea)	Adult	145	28-day mortality	APACHE II	0.659		reported	
+1363	Seol	2020	ICU (Korea)	Adult	145	28-day mortality	SOFA	0.745		reported	Ang-2/Ang-1 ratio 0.736
+1451	Que	2015	ICU (Switzerland derivation)	Adult	158	In-hospital mortality	APACHE II	0.638	0.543-0.733	reported	
+1451	Que	2015	ICU (Switzerland derivation)	Adult	158	In-hospital mortality	SAPS II	0.598	0.499-0.698	reported	
+1451	Que	2015	ICU (Switzerland derivation)	Adult	158	In-hospital mortality	APACHE II + PCT + PSP	0.721	0.632-0.812	reported	Externally validated (Brazil, n=91)
+1451	Que	2015	ICU (Switzerland derivation)	Adult	158	In-hospital mortality	SAPS II + PCT + PSP	0.710	0.617-0.802	reported	
