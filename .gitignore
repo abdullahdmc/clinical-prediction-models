@@ -10,3 +10,9 @@ build/artifact.html
 __pycache__/
 *.pyc
 ~$*
+
+# Vercel local link
+.vercel
+
+.vercel
+.env*

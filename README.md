@@ -2,7 +2,7 @@
 
 Prognostic and diagnostic models for sepsis, severe infection and febrile illness, organised by the outcome they predict. Each model sheet gives components, cut-offs, the original article and updates, outcome definitions, published performance and links to online calculators.
 
-**Website:** https://abdullahdmc.github.io/clinical-prediction-models/
+**Website:** https://clinical-prediction-models.vercel.app
 
 Research reference only, not for direct clinical use. Check scores against the original publication before using them in patient care.
 
@@ -10,7 +10,8 @@ Research reference only, not for direct clinical use. Check scores against the o
 
 | Path | What it is |
 |---|---|
-| `docs/` | The published site (`index.html` + `data.json`), served by GitHub Pages |
+| `docs/` | The published site (`index.html` + `data.json`), deployed to Vercel |
+| `vercel.json`, `.vercelignore` | Vercel settings: serve `docs/` as a static site, upload nothing else |
 | `build/src/content.py`, `content2.py` | Curated model sheets: **edit these to change site content** |
 | `build/template.html` | Page layout, styles and script |
 | `build/build_site.py` | Builds `docs/` from the content files |
@@ -40,4 +41,4 @@ Updated once a year in October, or on request:
 1. Re-run the PubMed query in `scripts/query2.txt` from the last update date.
 2. Mine new named models and recent development/validation studies (`scripts/mine.py`, `scripts/newmodels.py`).
 3. Add or update sheets in `build/src/content*.py`; set `UPDATED` in `build/build_site.py`.
-4. Rebuild, run the render test, commit and push.
+4. Rebuild, run the render test, commit and push, then deploy: `vercel deploy --prod`.
